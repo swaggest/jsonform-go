@@ -7,3 +7,4 @@
 ![Code lines](https://sloc.xyz/github/swaggest/jsonform-go/?category=code)
 ![Comments](https://sloc.xyz/github/swaggest/jsonform-go/?category=comments)
 
+This library renders HTML form from JSON Schema field tags of a Go structure.
