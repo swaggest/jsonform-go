@@ -18,8 +18,8 @@ type FormItem struct {
 	Prepend        string            `json:"prepend,omitempty" example:"I feel"`
 	Append         string            `json:"append,omitempty" example:"today"`
 	NoTitle        bool              `json:"notitle,omitempty"`
-	HtmlClass      string            `json:"htmlClass,omitempty" example:"usermood"`
-	HtmlMetaData   map[string]string `json:"htmlMetaData,omitempty" example:"{\"style\":\"border: 1px solid blue\",\"data-title\":\"Mood\"}"`
+	HTMLClass      string            `json:"htmlClass,omitempty" example:"usermood"`
+	HTMLMetaData   map[string]string `json:"htmlMetaData,omitempty" example:"{\"style\":\"border: 1px solid blue\",\"data-title\":\"Mood\"}"`
 	FieldHTMLClass string            `json:"fieldHtmlClass,omitempty" example:"input-xxlarge"`
 	Placeholder    string            `json:"placeholder,omitempty" example:"incredibly and admirably great"`
 	InlineTitle    string            `json:"inlinetitle,omitempty" example:"Check this box if you are over 18"`
