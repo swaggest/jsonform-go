@@ -110,10 +110,10 @@ func (r *Repository) AddWithName(value interface{}, name string) error {
 }
 
 func (r *Repository) Schema(value interface{}) *FormSchema {
-	return r.schemaByName(r.Name(value))
+	return r.SchemaByName(r.Name(value))
 }
 
-func (r *Repository) schemaByName(name string) *FormSchema {
+func (r *Repository) SchemaByName(name string) *FormSchema {
 	if s, ok := r.schemasByName[name]; ok {
 		return &s
 	}
