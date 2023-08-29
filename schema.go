@@ -2,6 +2,8 @@ package jsonform
 
 import (
 	"fmt"
+	"path"
+	"reflect"
 	"strings"
 
 	"github.com/swaggest/jsonschema-go"
@@ -33,19 +35,31 @@ type FormSchema struct {
 }
 
 type Repository struct {
-	reflector *jsonschema.Reflector
-	schemas   map[string]FormSchema
+	reflector     *jsonschema.Reflector
+	schemasByName map[string]FormSchema
+	namesByType   map[reflect.Type]string
 }
 
 func NewRepository(reflector *jsonschema.Reflector) *Repository {
 	r := Repository{}
 	r.reflector = reflector
-	r.schemas = make(map[string]FormSchema)
+	r.schemasByName = make(map[string]FormSchema)
+	r.namesByType = make(map[reflect.Type]string)
 
 	return &r
 }
 
-func (r *Repository) AddSchema(name string, value interface{}) error {
+func (r *Repository) Add(value interface{}) error {
+	name := strings.ToLower(path.Base(string(refl.GoType(refl.DeepIndirect(reflect.TypeOf(value)))))) // Just right amount of brackets.
+
+	return r.AddWithName(value, name)
+}
+
+func (r *Repository) Name(value interface{}) string {
+	return r.namesByType[refl.DeepIndirect(reflect.TypeOf(value))]
+}
+
+func (r *Repository) AddWithName(value interface{}, name string) error {
 	fs := FormSchema{}
 
 	schema, err := r.reflector.Reflect(value, jsonschema.InlineRefs, jsonschema.InterceptProp(
@@ -89,11 +103,20 @@ func (r *Repository) AddSchema(name string, value interface{}) error {
 
 	fs.Form = append(fs.Form, FormItem{FormType: "submit", FormTitle: "Submit"})
 	fs.Schema = schema
-	r.schemas[name] = fs
+	r.schemasByName[name] = fs
+	r.namesByType[refl.DeepIndirect(reflect.TypeOf(value))] = name
 
 	return nil
 }
 
-func (r *Repository) Schema(name string) FormSchema {
-	return r.schemas[name]
+func (r *Repository) Schema(value interface{}) *FormSchema {
+	return r.schemaByName(r.Name(value))
+}
+
+func (r *Repository) schemaByName(name string) *FormSchema {
+	if s, ok := r.schemasByName[name]; ok {
+		return &s
+	}
+
+	return nil
 }

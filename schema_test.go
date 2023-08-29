@@ -42,8 +42,8 @@ func (User) Description() string {
 func TestRepository_AddSchema(t *testing.T) {
 	repo := jsonform.NewRepository(&jsonschema.Reflector{})
 
-	assert.NoError(t, repo.AddSchema("user", User{}))
-	assertjson.EqualMarshal(t, []byte(`
+	assert.NoError(t, repo.AddWithName(User{}, "user"))
+	assertjson.EqMarshal(t, `
 		{
 		  "form":[
 			{"key":"firstName"},{"key":"lastName"},{"key":"locale"},{"key":"age"},
@@ -68,6 +68,6 @@ func TestRepository_AddSchema(t *testing.T) {
 			},
 			"type":"object"
 		  }
-		}`),
-		repo.Schema("user"))
+		}`,
+		repo.Schema(User{}))
 }

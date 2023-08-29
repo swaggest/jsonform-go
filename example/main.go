@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/swaggest/jsonform-go"
+	"github.com/swaggest/openapi-go/openapi31"
 	"github.com/swaggest/rest/web"
 	swgui "github.com/swaggest/swgui/v4emb"
 	"github.com/swaggest/usecase"
@@ -138,12 +139,12 @@ func main() {
 		Status:    "approved",
 		Bio:       "whoa, I never existed!",
 	})
-	s := web.DefaultService()
+	s := web.NewService(openapi31.NewReflector())
 
 	// Init API documentation schema.
-	s.OpenAPI.Info.Title = "Users"
-	s.OpenAPI.Info.WithDescription("This app showcases a trivial REST API.")
-	s.OpenAPI.Info.Version = "v1.2.3"
+	s.OpenAPISchema().SetTitle("Users")
+	s.OpenAPISchema().SetDescription("This app showcases a trivial REST API.")
+	s.OpenAPISchema().SetVersion("v1.2.3")
 
 	// Add use case handler to router.
 	s.Post("/users", createUser(ur))
@@ -154,8 +155,8 @@ func main() {
 	// Swagger UI endpoint at /docs.
 	s.Docs("/docs", swgui.New)
 
-	jf := jsonform.NewRepository(&s.OpenAPICollector.Reflector().Reflector)
-	_ = jf.AddSchema("user", User{})
+	jf := jsonform.NewRepository(s.OpenAPIReflector().JSONSchemaReflector())
+	_ = jf.AddWithName(User{}, "user")
 
 	jf.Mount(s, "/json-form/")
 

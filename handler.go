@@ -24,7 +24,7 @@ func (r *Repository) GetSchema() usecase.Interactor {
 	}
 
 	u := usecase.NewInteractor[schemaReq, FormSchema](func(ctx context.Context, input schemaReq, output *FormSchema) error {
-		if fs, found := r.schemas[input.Name]; found {
+		if fs, found := r.schemasByName[input.Name]; found {
 			*output = fs
 
 			return nil
