@@ -9,7 +9,7 @@
         this.form = null;
         this.title = null;
 
-        this.schemaUrl = '';
+        this.schemaName = '';
         this.schema = undefined;
 
         this.valueUrl = '';
@@ -28,22 +28,33 @@
     }
 
     /**
-     * @typedef formQueryParams
+     * @typedef formParams
      * @type {Object}
      * @property {String} title - Title of the form.
-     * @property {String} schemaUrl - URL to fetch schema.
+     * @property {String} schemaName - Schema name.
      * @property {String} valueUrl - URL to fetch value.
      * @property {String} submitUrl - URL to submit form.
      * @property {String} submitMethod - HTTP method to use on form submit.
+     *
+     * @property {Object} value - Value, can be absent if provided with valueUrl.
+     * @property {Object} schema - Schema, can be absent if provided with schemaUrl.
      */
 
 
     JSONForm.prototype.default = function () {
         /**
-         * @type {formQueryParams}
+         * @type {formParams}
          */
         var params = this.queryParams()
 
+        this.make(params)
+    }
+
+    /**
+     *
+     * @param {formParams} params
+     */
+    JSONForm.prototype.make = function (params) {
         this.title = $("#title");
 
         if (params.title) {
@@ -53,29 +64,38 @@
         console.log("QUERY PARAMS:", params)
 
         this.fail = function (html) {
-            $('#res').html('ERROR: ' + html)
+            $('#res').html('ERROR: ' + html);
         }
 
         this.success = function (html) {
-            $('#res').html(html)
+            $('#res').html(html);
         }
 
-        if (params.schemaUrl === null) {
-            this.fail("Missing schemaUrl parameter in URL")
-            return
+        if (params.schema !== null) {
+            this.schema = params.schema;
+        } else {
+            if (params.schemaName === null) {
+                this.fail("Missing schemaName parameter in URL");
+                return;
+            }
         }
+
 
         if (params.submitUrl === null) {
-            this.fail("Missing submitUrl parameter in URL")
-            return
+            this.fail("Missing submitUrl parameter in URL");
+            return;
         }
 
         if (params.submitMethod !== null) {
             this.submitMethod = params.submitMethod;
         }
 
-        this.submitUrl = params.submitUrl
-        this.schemaUrl = params.schemaUrl
+        this.submitUrl = params.submitUrl;
+        this.schemaName = params.schemaName;
+
+        if (params.value !== null) {
+            this.value = params.value;
+        }
 
         if (typeof params.valueUrl !== undefined) {
             this.valueUrl = params.valueUrl;
@@ -97,7 +117,9 @@
         var self = this
 
         if (this.schema === undefined) {
-            send(this.schemaUrl, "GET", null, 200, function (schema) {
+            var schemaUrl = this.schemaName + "-schema.json"
+
+            send(schemaUrl, "GET", null, 200, function (schema) {
                 self.schema = schema;
 
                 if (self.title !== null && $(self.title).text() === '') {
@@ -107,7 +129,7 @@
 
                 self.render()
             }, function (x) {
-                self.fail("Failed to load schema using URL:<br /><code>" + self.schemaUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
+                self.fail("Failed to load schema using URL:<br /><code>" + schemaUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
             })
 
             return
@@ -192,8 +214,8 @@
      * Set schema source with a URL.
      * @param {string} url
      */
-    JSONForm.prototype.setSchemaUrl = function (url) {
-        this.schemaUrl = url;
+    JSONForm.prototype.setSchemaName = function (name) {
+        this.schemaName = name;
     }
 
     /**

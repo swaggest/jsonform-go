@@ -6,11 +6,11 @@ require (
 	github.com/bool64/dev v0.2.31
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggest/assertjson v1.9.0
-	github.com/swaggest/jsonschema-go v0.3.59
+	github.com/swaggest/jsonschema-go v0.3.60
 	github.com/swaggest/openapi-go v0.2.39
 	github.com/swaggest/refl v1.2.1
 	github.com/swaggest/rest v0.2.58
-	github.com/swaggest/swgui v1.7.2
+	github.com/swaggest/swgui v1.7.3
 	github.com/swaggest/usecase v1.2.1
 	github.com/vearutop/statigz v1.4.0
 )

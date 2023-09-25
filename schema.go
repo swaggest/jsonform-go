@@ -35,9 +35,12 @@ type FormSchema struct {
 }
 
 type Repository struct {
-	reflector     *jsonschema.Reflector
+	reflector *jsonschema.Reflector
+
 	schemasByName map[string]FormSchema
 	namesByType   map[reflect.Type]string
+
+	baseURL string
 }
 
 func NewRepository(reflector *jsonschema.Reflector) *Repository {
@@ -49,17 +52,24 @@ func NewRepository(reflector *jsonschema.Reflector) *Repository {
 	return &r
 }
 
-func (r *Repository) Add(value interface{}) error {
-	name := strings.ToLower(path.Base(string(refl.GoType(refl.DeepIndirect(reflect.TypeOf(value)))))) // Just right amount of brackets.
+func (r *Repository) Name(value interface{}) (string, error) {
+	t := refl.DeepIndirect(reflect.TypeOf(value))
 
-	return r.AddWithName(value, name)
+	if name, ok := r.namesByType[t]; ok {
+		return name, nil
+	}
+
+	name := strings.TrimPrefix(strings.ToLower(path.Base(string(refl.GoType(t)))), "main.")
+
+	return name, r.Add(value, name)
 }
 
-func (r *Repository) Name(value interface{}) string {
-	return r.namesByType[refl.DeepIndirect(reflect.TypeOf(value))]
-}
+// Add registers schema with custom name, this is not needed if default name is good enough.
+func (r *Repository) Add(value interface{}, name string) error {
+	if _, ok := r.schemasByName[name]; ok {
+		return fmt.Errorf("schema for %s (%T) is already added", name, value)
+	}
 
-func (r *Repository) AddWithName(value interface{}, name string) error {
 	fs := FormSchema{}
 
 	schema, err := r.reflector.Reflect(value, jsonschema.InlineRefs, jsonschema.InterceptProp(
@@ -109,8 +119,12 @@ func (r *Repository) AddWithName(value interface{}, name string) error {
 	return nil
 }
 
-func (r *Repository) Schema(value interface{}) *FormSchema {
-	return r.SchemaByName(r.Name(value))
+func (r *Repository) Schema(value interface{}) (*FormSchema, error) {
+	if name, err := r.Name(value); err == nil {
+		return r.SchemaByName(name), nil
+	} else {
+		return nil, err
+	}
 }
 
 func (r *Repository) SchemaByName(name string) *FormSchema {
@@ -119,4 +133,14 @@ func (r *Repository) SchemaByName(name string) *FormSchema {
 	}
 
 	return nil
+}
+
+func (r *Repository) Names() []string {
+	names := make([]string, 0, len(r.schemasByName))
+
+	for name := range r.schemasByName {
+		names = append(names, name)
+	}
+
+	return names
 }

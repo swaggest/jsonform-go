@@ -3,6 +3,7 @@ package jsonform
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/swaggest/rest/web"
 	"github.com/swaggest/usecase"
@@ -14,17 +15,38 @@ func (r *Repository) Handler() http.Handler {
 }
 
 func (r *Repository) Mount(s *web.Service, prefix string) {
+	r.baseURL = prefix
+
 	s.Get(prefix+"{name}-schema.json", r.GetSchema())
 	s.Mount(prefix, http.StripPrefix(prefix, staticServer))
 }
 
-func (r *Repository) GetSchema() usecase.Interactor {
-	type schemaReq struct {
-		Name string `path:"name"`
+type schemaReq struct {
+	Name schemaName `path:"name"`
+}
+
+type schemaName string
+
+func (s schemaName) Enum() []interface{} {
+	var enum []interface{}
+
+	for _, v := range strings.Split(string(s), ",") {
+		enum = append(enum, v)
 	}
 
-	u := usecase.NewInteractor[schemaReq, FormSchema](func(ctx context.Context, input schemaReq, output *FormSchema) error {
-		if fs, found := r.schemasByName[input.Name]; found {
+	return enum
+}
+
+func (r *Repository) GetSchema() usecase.Interactor {
+	in := schemaReq{
+		Name: schemaName(strings.Join(r.Names(), ",")),
+	}
+
+	u := usecase.NewIOI(in, new(FormSchema), func(ctx context.Context, in, out interface{}) error {
+		input, _ := in.(schemaReq)
+		output, _ := out.(*FormSchema)
+
+		if fs, found := r.schemasByName[string(input.Name)]; found {
 			*output = fs
 
 			return nil
@@ -32,6 +54,9 @@ func (r *Repository) GetSchema() usecase.Interactor {
 
 		return status.NotFound
 	})
+
+	u.SetTitle("Get JSONForm Schema")
+	u.SetExpectedErrors(status.NotFound)
 
 	return u
 }
