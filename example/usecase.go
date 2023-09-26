@@ -11,13 +11,38 @@ import (
 )
 
 func createUserForm(r *jsonform.Repository) usecase.Interactor {
+	type another struct {
+		Foo string `json:"foo" required:"true" title:"Foo" minLength:"3"`
+		Bar string `json:"bar" required:"true" title:"Bar" maxLength:"3"`
+	}
+
 	u := usecase.NewInteractor(func(ctx context.Context, input struct{}, output *usecase.OutputWithEmbeddedWriter) error {
-		return r.RenderForm(jsonform.FormParams{
-			Title:        "Create User",
-			SubmitMethod: http.MethodPost,
-			SubmitURL:    "/users",
-			Value:        User{},
-		}, output.Writer)
+		return r.Render(output.Writer,
+			jsonform.Page{
+				Title:       "Create User and some more",
+				PrependHTML: `<div><img src="http://placekitten.com/200/300" /></div>`,
+				AppendHTML:  `<div><img src="http://placekitten.com/300/200" /></div>`,
+			},
+			jsonform.Form{
+				Title:         "Create User",
+				SubmitMethod:  http.MethodPost,
+				SubmitURL:     "/users",
+				Value:         User{},
+				SuccessStatus: http.StatusCreated,
+			},
+			jsonform.Form{
+				Title:        "Another random form",
+				SubmitMethod: http.MethodPut,
+				SubmitURL:    "/nowhere",
+				Value:        another{},
+			},
+			jsonform.Form{
+				Title:        "More random forms",
+				SubmitMethod: http.MethodPut,
+				SubmitURL:    "/nowhere",
+				Value:        another{},
+			},
+		)
 	})
 
 	return u
@@ -34,12 +59,13 @@ func editUserForm(r *jsonform.Repository, ur *userRepo) usecase.Interactor {
 			return err
 		}
 
-		return r.RenderForm(jsonform.FormParams{
-			Title:        "Create User",
-			SubmitMethod: http.MethodPut,
-			SubmitURL:    "/user/" + strconv.Itoa(input.ID) + ".json",
-			Value:        user,
-		}, output.Writer)
+		return r.Render(output.Writer, jsonform.Page{}, jsonform.Form{
+			Title:         "Update User",
+			SubmitMethod:  http.MethodPut,
+			SubmitURL:     "/user/" + strconv.Itoa(input.ID) + ".json",
+			Value:         user,
+			SuccessStatus: http.StatusNoContent,
+		})
 	})
 
 	return u

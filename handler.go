@@ -2,6 +2,7 @@ package jsonform
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -10,10 +11,7 @@ import (
 	"github.com/swaggest/usecase/status"
 )
 
-func (r *Repository) Handler() http.Handler {
-	return nil
-}
-
+// Mount attaches handlers to web service.
 func (r *Repository) Mount(s *web.Service, prefix string) {
 	r.baseURL = prefix
 
@@ -28,23 +26,32 @@ type schemaReq struct {
 type schemaName string
 
 func (s schemaName) Enum() []interface{} {
-	var enum []interface{}
+	ss := strings.Split(string(s), ",")
+	enum := make([]interface{}, 0, len(ss))
 
-	for _, v := range strings.Split(string(s), ",") {
+	for _, v := range ss {
 		enum = append(enum, v)
 	}
 
 	return enum
 }
 
+// GetSchema returns JSONForm schema.
 func (r *Repository) GetSchema() usecase.Interactor {
 	in := schemaReq{
 		Name: schemaName(strings.Join(r.Names(), ",")),
 	}
 
 	u := usecase.NewIOI(in, new(FormSchema), func(ctx context.Context, in, out interface{}) error {
-		input, _ := in.(schemaReq)
-		output, _ := out.(*FormSchema)
+		input, ok := in.(schemaReq)
+		if !ok {
+			return fmt.Errorf("unexpected input: %T", in)
+		}
+
+		output, ok := out.(*FormSchema)
+		if !ok {
+			return fmt.Errorf("unexpected output: %T", out)
+		}
 
 		if fs, found := r.schemasByName[string(input.Name)]; found {
 			*output = fs

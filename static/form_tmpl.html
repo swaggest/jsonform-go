@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>Form</title>
+    <title>{{.Title}}</title>
     <base href="{{.BaseURL}}">
     <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,11 +10,21 @@
 </head>
 <body>
 
-<div style="margin:2em" class="pure-u-2-5">
-    <h1 id="title"></h1>
-    <form id="schema-form" class="pure-form"></form>
-    <div id="res" class="alert"></div>
+{{.PrependHTML}}
+
+<div style="margin:2em">
+
+{{range $i, $val := .Params}}
+<div class="pure-u-2-5" style="margin-right:2em">
+    <h1 id="form-title-{{$i}}"></h1>
+    <form id="schema-form-{{$i}}" class="pure-form"></form>
+    <div id="form-result-{{$i}}" class="alert"></div>
 </div>
+{{end}}
+
+</div>
+
+{{.AppendHTML}}
 
 <script type="text/javascript" src="jquery-3.6.3.min.js"></script>
 <script type="text/javascript" src="underscore.js"></script>
@@ -22,9 +32,17 @@
 <script type="text/javascript" src="jsonform.js"></script>
 <script type="text/javascript" src="form.js"></script>
 <script type="text/javascript">
-    var params = {{.Params}};
-    var form = new JSONForm($('#schema-form'));
+{{range $i, $val := .Params}}
+(function(){
+    var params = {{$val}};
+    var form = new JSONForm();
+    form.setFormElement($('#schema-form-{{$i}}'));
+    form.setTitleElement($('#form-title-{{$i}}'));
+    form.setResultElement($('#form-result-{{$i}}'))
     form.make(params);
+})();
+{{end}}
+
 </script>
 </body>
 </html>

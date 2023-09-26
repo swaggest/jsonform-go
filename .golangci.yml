@@ -20,6 +20,7 @@ linters-settings:
 linters:
   enable-all: true
   disable:
+    - goerr113
     - lll
     - maligned
     - gochecknoglobals
@@ -67,4 +68,8 @@ issues:
         - errcheck # Error checking omitted for brevity.
         - gosec
       path: "example_"
+    - linters:
+        - revive
+        - stylecheck
+      text: Html
 

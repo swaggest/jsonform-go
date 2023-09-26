@@ -42,7 +42,7 @@ func (User) Description() string {
 func TestRepository_AddSchema(t *testing.T) {
 	repo := jsonform.NewRepository(&jsonschema.Reflector{})
 
-	assert.NoError(t, repo.AddWithName(User{}, "user"))
+	assert.NoError(t, repo.Add(User{}, "user"))
 	assertjson.EqMarshal(t, `
 		{
 		  "form":[

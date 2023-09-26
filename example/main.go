@@ -6,6 +6,7 @@ import (
 
 	"github.com/swaggest/jsonform-go"
 	"github.com/swaggest/openapi-go/openapi31"
+	"github.com/swaggest/rest/nethttp"
 	"github.com/swaggest/rest/web"
 	swgui "github.com/swaggest/swgui/v5emb"
 )
@@ -28,10 +29,11 @@ func main() {
 	s.OpenAPISchema().SetVersion("v1.2.3")
 
 	jf := jsonform.NewRepository(s.OpenAPIReflector().JSONSchemaReflector())
-	ur.schemaName, _ = jf.Name(User{})
+	_ = jf.Add(User{})
+	ur.schemaName = jf.Name(User{})
 
 	// Add use case handler to router.
-	s.Post("/users", createUser(ur))
+	s.Post("/users", createUser(ur), nethttp.SuccessStatus(http.StatusCreated))
 	s.Get("/users.json", listUsers(ur))
 	s.Get("/user/{id}.json", getUser(ur))
 	s.Put("/user/{id}.json", updateUser(ur))

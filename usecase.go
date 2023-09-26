@@ -2,57 +2,65 @@ package jsonform
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"io"
 )
 
-/**
- * @typedef formParams
- * @type {Object}
- * @property {String} title - Title of the form.
- * @property {String} schemaName - Schema name.
- * @property {String} valueUrl - URL to fetch value.
- * @property {String} submitUrl - URL to submit form.
- * @property {String} submitMethod - HTTP method to use on form submit.
- */
-
-type FormParams struct {
-	Title        string `json:"title,omitempty"`
-	SchemaName   string `json:"schemaName,omitempty"`
-	ValueURL     string `json:"valueUrl,omitempty"`
-	SubmitURL    string `json:"submitUrl,omitempty"`
-	SubmitMethod string `json:"submitMethod,omitempty"`
+// Form describes form parameters.
+type Form struct {
+	Title         string `json:"title,omitempty"`
+	SchemaName    string `json:"schemaName,omitempty"`
+	ValueURL      string `json:"valueUrl,omitempty"`
+	SubmitURL     string `json:"submitUrl,omitempty"`
+	SubmitMethod  string `json:"submitMethod,omitempty"`
+	SuccessStatus int    `json:"successStatus,omitempty"`
 
 	Schema *FormSchema `json:"schema,omitempty"`
 	Value  interface{} `json:"value,omitempty"`
 }
 
+// Page allows page customizations.
+type Page struct {
+	PrependHTML template.HTML
+	AppendHTML  template.HTML
+	Title       string
+}
+
 var formTemplate = loadTemplate("form_tmpl.html")
 
-func (r *Repository) RenderForm(params FormParams, w io.Writer) error {
+// Render renders forms as web page.
+func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 	type pageData struct {
-		Params  template.JS
+		Page
+		Params  []template.JS
 		BaseURL string
 	}
 
-	var err error
-
-	if params.Schema == nil && params.Value != nil {
-		params.Schema, err = r.Schema(params.Value)
-		if err != nil {
-			return fmt.Errorf("render form: %w", err)
-		}
-	}
-
-	j, err := json.Marshal(params)
-	if err != nil {
-		return err
-	}
-
 	d := pageData{
-		Params:  template.JS(j),
+		Page:    p,
 		BaseURL: r.baseURL,
+	}
+
+	for _, form := range forms {
+		if d.Title == "" {
+			d.Title = form.Title
+		}
+
+		if form.Schema == nil && form.Value != nil {
+			form.Schema = r.Schema(form.Value)
+			if form.Schema == nil {
+				if err := r.Add(form.Value); err != nil {
+					return err
+				}
+			}
+		}
+
+		j, err := json.Marshal(form)
+		if err != nil {
+			return err
+		}
+
+		d.Params = append(d.Params, template.JS(j)) //nolint:gosec
 	}
 
 	return formTemplate.Execute(w, d)

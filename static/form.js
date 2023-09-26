@@ -6,8 +6,30 @@
      * @constructor
      */
     function JSONForm() {
+        /**
+         * @type {Element}
+         */
         this.form = null;
+
+        /**
+         * @type {Element}
+         */
         this.title = null;
+
+        /**
+         * @type {Element}
+         */
+        this.result = null;
+
+        /**
+         * @type {Function}
+         */
+        this.fail = null;
+
+        /**
+         * @type {Function}
+         */
+        this.success = null;
 
         this.schemaName = '';
         this.schema = undefined;
@@ -17,14 +39,7 @@
 
         this.submitUrl = '';
         this.submitMethod = 'POST';
-
-        this.fail = function (html) {
-            alert(html)
-        }
-
-        this.success = function (html) {
-            alert(html)
-        }
+        this.successStatus = 200;
     }
 
     /**
@@ -35,6 +50,7 @@
      * @property {String} valueUrl - URL to fetch value.
      * @property {String} submitUrl - URL to submit form.
      * @property {String} submitMethod - HTTP method to use on form submit.
+     * @property {Number} successStatus - Success HTTP status code to expect on submit.
      *
      * @property {Object} value - Value, can be absent if provided with valueUrl.
      * @property {Object} schema - Schema, can be absent if provided with schemaUrl.
@@ -55,7 +71,13 @@
      * @param {formParams} params
      */
     JSONForm.prototype.make = function (params) {
-        this.title = $("#title");
+        if (this.title === null) {
+            this.title = $("#title");
+        }
+
+        if (this.result === null) {
+            this.result = $("#res");
+        }
 
         if (params.title) {
             $(this.title).text(params.title)
@@ -63,31 +85,39 @@
         }
         console.log("QUERY PARAMS:", params)
 
-        this.fail = function (html) {
-            $('#res').html('ERROR: ' + html);
+        if (this.fail === null) {
+            this.fail = function (html) {
+                this.result.html('ERROR: ' + html);
+            }
         }
 
-        this.success = function (html) {
-            $('#res').html(html);
+        if (this.success === null) {
+            this.success = function (html) {
+                this.result.html(html);
+            }
         }
 
-        if (params.schema !== null) {
+        if (params.schema != null) {
             this.schema = params.schema;
         } else {
-            if (params.schemaName === null) {
+            if (params.schemaName == null) {
                 this.fail("Missing schemaName parameter in URL");
                 return;
             }
         }
 
 
-        if (params.submitUrl === null) {
+        if (params.submitUrl == null) {
             this.fail("Missing submitUrl parameter in URL");
             return;
         }
 
-        if (params.submitMethod !== null) {
+        if (params.submitMethod != null) {
             this.submitMethod = params.submitMethod;
+        }
+
+        if (params.successStatus != null) {
+            this.successStatus = Number(params.successStatus);
         }
 
         this.submitUrl = params.submitUrl;
@@ -101,7 +131,9 @@
             this.valueUrl = params.valueUrl;
         }
 
-        this.setFormElement($('#schema-form'))
+        if (this.form == null) {
+            this.setFormElement($('#schema-form'))
+        }
 
         console.log("FORM", this)
 
@@ -119,12 +151,14 @@
         if (this.schema === undefined) {
             var schemaUrl = this.schemaName + "-schema.json"
 
-            send(schemaUrl, "GET", null, 200, function (schema) {
-                self.schema = schema;
+            send(schemaUrl, "GET", null, 200, function (resp) {
+                console.log("SCHEMA RESP", resp)
+
+                self.schema = JSON.parse(resp.responseText);
 
                 if (self.title !== null && $(self.title).text() === '') {
-                    $(self.title).text(schema.schema.title)
-                    document.title = schema.schema.title
+                    $(self.title).text(self.schema.schema.title)
+                    document.title = self.schema.schema.title
                 }
 
                 self.render()
@@ -136,8 +170,8 @@
         }
 
         if (this.value === undefined && this.valueUrl !== undefined && this.valueUrl !== '') {
-            send(this.valueUrl, "GET", null, 200, function (value) {
-                self.value = value;
+            send(this.valueUrl, "GET", null, 200, function (resp) {
+                self.value = JSON.parse(resp.responseText);
 
                 self.render()
             }, function (x) {
@@ -165,10 +199,13 @@
                 }
 
                 if (self.submitUrl && self.submitMethod) {
-                    send(self.submitUrl, self.submitMethod, values, 0, function () {
+                    send(self.submitUrl, self.submitMethod, values, self.successStatus, function () {
                         self.success('Submitted.')
                     }, function (x) {
-                        self.fail("Failed to submit form using URL:<br /><code>" + self.submitUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
+                        self.fail("Failed to submit form using URL:<br /><code>" + self.submitUrl + "</code><br />" +
+                            "Expected status:<br /><code>"+self.successStatus+"</code><br />" +
+                            "Status:<br /><code>" + x.status + "</code><br />" +
+                            "Response:<br /><code>" + x.responseText + "</code>")
                     })
                 }
             }
@@ -182,7 +219,7 @@
     }
 
     /**
-     * @param {Element} title - Form HTML element.
+     * @param {Element} title - Title HTML element.
      */
     JSONForm.prototype.setTitleElement = function (title) {
         this.title = title;
@@ -194,6 +231,13 @@
      */
     JSONForm.prototype.setFormElement = function (form) {
         this.form = form;
+    }
+
+    /**
+     * @param {Element} result - Result HTML element.
+     */
+    JSONForm.prototype.setResultElement = function (result) {
+        this.result = result;
     }
 
     /**
@@ -248,7 +292,7 @@
      * @param {String} method
      * @param {Object} bodyValues
      * @param {Number} successStatus
-     * @param {JSONCallback} successCallback
+     * @param {RawCallback} successCallback
      * @param {RawCallback} failCallback
      */
     function send(url, method, bodyValues, successStatus, successCallback, failCallback) {
@@ -258,6 +302,8 @@
                 return;
             }
 
+            console.log("request finished with status", x.status, "expected status", successStatus)
+
             if (!successStatus) {
                 if (typeof (successCallback) === 'function') {
                     successCallback(x);
@@ -266,10 +312,11 @@
                 return
             }
 
+
             switch (x.status) {
                 case successStatus:
                     if (typeof (successCallback) === 'function') {
-                        successCallback(JSON.parse(x.responseText));
+                        successCallback(x);
                     }
                     break;
                 default:
