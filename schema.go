@@ -12,9 +12,10 @@ import (
 
 // FormItem defines form item rendering parameters.
 type FormItem struct {
-	Key       string `json:"key,omitempty" example:"longmood"`
-	FormType  string `json:"type,omitempty" examples:"[\"textarea\",\"password\",\"wysihtml5\",\"submit\",\"color\",\"checkboxes\",\"radios\",\"fieldset\", \"help\", \"hidden\"]"`
-	FormTitle string `json:"title,omitempty" example:"Submit"`
+	Key       string     `json:"key,omitempty" example:"longmood"`
+	FormType  string     `json:"type,omitempty" examples:"[\"textarea\",\"password\",\"wysihtml5\",\"submit\",\"color\",\"checkboxes\",\"radios\",\"fieldset\", \"help\", \"hidden\", \"array\"]"`
+	FormTitle string     `json:"title,omitempty" example:"Submit"`
+	Items     []FormItem `json:"items,omitempty"`
 
 	ReadOnly bool `json:"readonly,omitempty"`
 
@@ -89,28 +90,38 @@ func (r *Repository) AddNamed(value interface{}, name string) error {
 	}
 
 	fs := FormSchema{}
+	itemsSection := map[string]*FormItem{}
 
 	schema, err := r.reflector.Reflect(value, jsonschema.InlineRefs, jsonschema.InterceptProp(
 		func(params jsonschema.InterceptPropParams) error {
-			if !params.Processed {
-				return nil
-			}
-
-			if params.PropertySchema.HasType(jsonschema.Object) {
+			if !params.Processed || params.PropertySchema.HasType(jsonschema.Object) {
 				return nil
 			}
 
 			fi := FormItem{
-				Key: strings.Join(append(params.Path[1:], params.Name), "."),
+				Key: strings.ReplaceAll(strings.Join(append(params.Path[1:], params.Name), "."), ".[]", "[]"),
 			}
-
-			fi.Key = strings.ReplaceAll(fi.Key, ".[]", "[]")
 
 			if err := refl.PopulateFieldsFromTags(&fi, params.Field.Tag); err != nil {
 				return err
 			}
 
-			fs.Form = append(fs.Form, fi)
+			if s := itemsSection[fi.Key]; s != nil {
+				fi.FormType = "array"
+				fi.Items = []FormItem{*s}
+			}
+
+			if p := strings.LastIndex(fi.Key, "[]"); p != -1 {
+				parent := fi.Key[0:p]
+
+				if itemsSection[parent] == nil {
+					itemsSection[parent] = &FormItem{FormType: "section"}
+				}
+
+				itemsSection[parent].Items = append(itemsSection[parent].Items, fi)
+			} else {
+				fs.Form = append(fs.Form, fi)
+			}
 
 			return nil
 		},
@@ -119,8 +130,7 @@ func (r *Repository) AddNamed(value interface{}, name string) error {
 		return fmt.Errorf("reflecting %s schema: %w", name, err)
 	}
 
-	// Complying with Draft 3.
-	for _, name := range schema.Required {
+	for _, name := range schema.Required { // Complying with Draft 3.
 		if prop, ok := schema.Properties[name]; ok {
 			prop.TypeObject.WithExtraPropertiesItem("required", true)
 		}
