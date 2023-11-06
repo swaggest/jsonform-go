@@ -1,7 +1,6 @@
 package jsonform
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -16,15 +15,30 @@ type Form struct {
 	SubmitMethod  string `json:"submitMethod,omitempty"`
 	SuccessStatus int    `json:"successStatus,omitempty"`
 
+	// OnSuccess is a javascript callback that receives XMLHttpRequest value in case of successful response.
+	OnSuccess template.JS `json:"-"`
+	// OnFail is a javascript callback that receives XMLHttpRequest value in case of a failure response.
+	OnFail template.JS `json:"-"`
+	// OnError is a javascript callback that receives string HTML value in case of an error while processing the form.
+	OnError template.JS `json:"-"`
+
 	Schema *FormSchema `json:"schema,omitempty"`
 	Value  interface{} `json:"value,omitempty"`
 }
 
 // Page allows page customizations.
 type Page struct {
+	// AppendHTMLHead is injected into the <head> of an HTML document.
+	AppendHTMLHead template.HTML
+
+	// PrependHTML is added before the forms.
 	PrependHTML template.HTML
-	AppendHTML  template.HTML
-	Title       string
+
+	// AppendHTML is added after the forms.
+	AppendHTML template.HTML
+
+	// Title is set to HTML document title.
+	Title string
 }
 
 var formTemplate = loadTemplate("form_tmpl.html")
@@ -33,7 +47,7 @@ var formTemplate = loadTemplate("form_tmpl.html")
 func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 	type pageData struct {
 		Page
-		Params  []template.JS
+		Params  []Form
 		BaseURL string
 	}
 
@@ -56,12 +70,7 @@ func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 			}
 		}
 
-		j, err := json.Marshal(form)
-		if err != nil {
-			return err
-		}
-
-		d.Params = append(d.Params, template.JS(j)) //nolint:gosec
+		d.Params = append(d.Params, form)
 	}
 
 	return formTemplate.Execute(w, d)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -59,13 +60,19 @@ func editUserForm(r *jsonform.Repository, ur *userRepo) usecase.Interactor {
 			return err
 		}
 
-		return r.Render(output.Writer, jsonform.Page{}, jsonform.Form{
+		err = r.Render(output.Writer, jsonform.Page{}, jsonform.Form{
 			Title:         "Update User",
 			SubmitMethod:  http.MethodPut,
 			SubmitURL:     "/user/" + strconv.Itoa(input.ID) + ".json",
 			Value:         user,
 			SuccessStatus: http.StatusNoContent,
+			OnSuccess:     `function(x){console.log(x);alert("response status: " + x.status)}`,
 		})
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		return err
 	})
 
 	return u

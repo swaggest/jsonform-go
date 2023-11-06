@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="pure.css">
+    {{.AppendHTMLHead}}
 </head>
 <body>
 
@@ -34,11 +35,23 @@
 <script type="text/javascript">
 {{range $i, $val := .Params}}
 (function(){
+    /**
+     * @type {formParams}
+     */
     var params = {{$val}};
     var form = new JSONForm();
     form.setFormElement($('#schema-form-{{$i}}'));
     form.setTitleElement($('#form-title-{{$i}}'));
     form.setResultElement($('#form-result-{{$i}}'))
+    {{if $val.OnSuccess}}
+    params.onSuccess = {{$val.OnSuccess}}
+    {{end}}
+    {{if $val.OnFail}}
+    params.onFail = {{$val.OnFail}}
+    {{end}}
+    {{if $val.OnError}}
+    params.onError = {{$val.OnError}}
+    {{end}}
     form.make(params);
 })();
 {{end}}

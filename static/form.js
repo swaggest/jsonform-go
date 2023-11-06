@@ -22,12 +22,17 @@
         this.result = null;
 
         /**
-         * @type {Function}
+         * @type {RawCallback}
          */
         this.fail = null;
 
         /**
-         * @type {Function}
+         * @type {HTMLCallback}
+         */
+        this.error = null;
+
+        /**
+         * @type {RawCallback}
          */
         this.success = null;
 
@@ -51,6 +56,9 @@
      * @property {String} submitUrl - URL to submit form.
      * @property {String} submitMethod - HTTP method to use on form submit.
      * @property {Number} successStatus - Success HTTP status code to expect on submit.
+     * @property {RawCallback} onSuccess - Callback for successful response.
+     * @property {RawCallback} onFail - Callback for failed response.
+     * @property {HTMLCallback} onError - Callback for error.
      *
      * @property {Object} value - Value, can be absent if provided with valueUrl.
      * @property {Object} schema - Schema, can be absent if provided with schemaUrl.
@@ -87,15 +95,38 @@
         }
         console.log("QUERY PARAMS:", params)
 
-        if (this.fail === null) {
-            this.fail = function (html) {
+        if (params.onSuccess) {
+            this.success = params.onSuccess
+        }
+
+        if (params.onFail) {
+            this.fail = params.onFail
+        }
+
+        if (params.onError) {
+            this.error = params.onError
+        }
+
+        var self = this
+
+        if (this.error === null) {
+            this.error = function (html) {
                 this.result.html('ERROR: ' + html);
+            }
+        }
+
+        if (this.fail === null) {
+            this.fail = function (x) {
+                self.error("Failed to submit form using URL:<br /><code>" + self.submitUrl + "</code><br />" +
+                    "Expected status:<br /><code>" + self.successStatus + "</code><br />" +
+                    "Status:<br /><code>" + x.status + "</code><br />" +
+                    "Response:<br /><code>" + x.responseText + "</code>")
             }
         }
 
         if (this.success === null) {
             this.success = function (html) {
-                this.result.html(html);
+                this.result.html("Submitted.");
             }
         }
 
@@ -103,14 +134,14 @@
             this.schema = params.schema;
         } else {
             if (params.schemaName == null) {
-                this.fail("Missing schemaName parameter in URL");
+                this.error("Missing schemaName parameter in URL");
                 return;
             }
         }
 
 
         if (params.submitUrl == null) {
-            this.fail("Missing submitUrl parameter in URL");
+            this.error("Missing submitUrl parameter in URL");
             return;
         }
 
@@ -144,7 +175,7 @@
 
     JSONForm.prototype.render = function () {
         if (this.form === null) {
-            this.fail("Missing destination form element, did you call setFormElement?")
+            this.error("Missing destination form element, did you call setFormElement?")
             return
         }
 
@@ -165,7 +196,7 @@
 
                 self.render()
             }, function (x) {
-                self.fail("Failed to load schema using URL:<br /><code>" + schemaUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
+                self.error("Failed to load schema using URL:<br /><code>" + schemaUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
             })
 
             return
@@ -177,7 +208,7 @@
 
                 self.render()
             }, function (x) {
-                self.fail("Failed to load value using URL:<br /><code>" + self.valueUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
+                self.error("Failed to load value using URL:<br /><code>" + self.valueUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
             })
 
             return
@@ -190,7 +221,7 @@
             schema: this.schema.schema,
             form: this.schema.form,
             onSubmit: function (errors, values) {
-                self.success('')
+                self.result.html('')
 
                 console.log("VALUES", values);
                 console.log("ERRORS", errors);
@@ -201,14 +232,7 @@
                 }
 
                 if (self.submitUrl && self.submitMethod) {
-                    send(self.submitUrl, self.submitMethod, values, self.successStatus, function () {
-                        self.success('Submitted.')
-                    }, function (x) {
-                        self.fail("Failed to submit form using URL:<br /><code>" + self.submitUrl + "</code><br />" +
-                            "Expected status:<br /><code>"+self.successStatus+"</code><br />" +
-                            "Status:<br /><code>" + x.status + "</code><br />" +
-                            "Response:<br /><code>" + x.responseText + "</code>")
-                    })
+                    send(self.submitUrl, self.submitMethod, values, self.successStatus, self.success, self.fail)
                 }
             }
         }
@@ -257,15 +281,15 @@
     }
 
     /**
-     * Set schema source with a URL.
-     * @param {string} url
+     * Set schema name.
+     * @param {string} name
      */
     JSONForm.prototype.setSchemaName = function (name) {
         this.schemaName = name;
     }
 
     /**
-     * Set schema source with a URL.
+     * Set value source with a URL.
      * @param {string} url
      */
     JSONForm.prototype.setValueUrl = function (url) {
@@ -281,6 +305,11 @@
     /**
      * @callback RawCallback
      * @param {XMLHttpRequest} value
+     */
+
+    /**
+     * @callback HTMLCallback
+     * @param {String} value
      */
 
     /**
