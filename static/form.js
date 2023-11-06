@@ -81,7 +81,9 @@
 
         if (params.title) {
             $(this.title).text(params.title)
-            document.title = params.title
+            if (document.title === "") {
+                document.title = params.title
+            }
         }
         console.log("QUERY PARAMS:", params)
 
