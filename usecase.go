@@ -2,6 +2,7 @@ package jsonform
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io"
 )
@@ -47,11 +48,11 @@ func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 		}
 
 		if form.Schema == nil && form.Value != nil {
-			form.Schema = r.Schema(form.Value)
-			if form.Schema == nil {
-				if err := r.Add(form.Value); err != nil {
-					return err
-				}
+			var err error
+
+			form.Schema, err = r.formSchema(form.Value)
+			if err != nil {
+				return err
 			}
 		}
 
@@ -64,4 +65,21 @@ func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 	}
 
 	return formTemplate.Execute(w, d)
+}
+
+func (r *Repository) formSchema(value interface{}) (*FormSchema, error) {
+	formSchema := r.Schema(value)
+	if formSchema == nil {
+		if r.Strict {
+			return nil, fmt.Errorf("missing form schema for %T", value)
+		}
+
+		if err := r.Add(value); err != nil {
+			return nil, err
+		}
+
+		formSchema = r.Schema(value)
+	}
+
+	return formSchema, nil
 }

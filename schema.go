@@ -5,6 +5,7 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/swaggest/jsonschema-go"
 	"github.com/swaggest/refl"
@@ -40,8 +41,12 @@ type FormSchema struct {
 
 // Repository manages form schemas and provides integration helpers.
 type Repository struct {
+	// Strict requires all schemas to be added in advance.
+	Strict bool
+
 	reflector *jsonschema.Reflector
 
+	mu            sync.Mutex
 	schemasByName map[string]FormSchema
 	namesByType   map[reflect.Type]string
 
@@ -85,11 +90,25 @@ func (r *Repository) Add(values ...interface{}) error {
 
 // AddNamed registers schema with custom name, this is not needed if default name is good enough.
 func (r *Repository) AddNamed(value interface{}, name string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if _, ok := r.schemasByName[name]; ok {
 		return fmt.Errorf("schema for %s (%T) is already added", name, value)
 	}
 
-	fs := FormSchema{}
+	fs, err := r.reflect(value, name)
+	if err != nil {
+		return err
+	}
+
+	r.schemasByName[name] = fs
+	r.namesByType[refl.DeepIndirect(reflect.TypeOf(value))] = name
+
+	return nil
+}
+
+func (r *Repository) reflect(value interface{}, name string) (fs FormSchema, err error) {
 	itemsSection := map[string]*FormItem{}
 
 	schema, err := r.reflector.Reflect(value, jsonschema.InlineRefs, jsonschema.InterceptProp(
@@ -127,7 +146,7 @@ func (r *Repository) AddNamed(value interface{}, name string) error {
 		},
 	))
 	if err != nil {
-		return fmt.Errorf("reflecting %s schema: %w", name, err)
+		return fs, fmt.Errorf("reflecting %s schema: %w", name, err)
 	}
 
 	for _, name := range schema.Required { // Complying with Draft 3.
@@ -138,12 +157,10 @@ func (r *Repository) AddNamed(value interface{}, name string) error {
 
 	schema.Required = nil
 
-	fs.Form = append(fs.Form, FormItem{FormType: "submit", FormTitle: "Submit"})
 	fs.Schema = schema
-	r.schemasByName[name] = fs
-	r.namesByType[refl.DeepIndirect(reflect.TypeOf(value))] = name
+	fs.Form = append(fs.Form, FormItem{FormType: "submit", FormTitle: "Submit"})
 
-	return nil
+	return fs, nil
 }
 
 // Schema returns previously added schema by its sample value.
@@ -155,6 +172,9 @@ func (r *Repository) Schema(value interface{}) *FormSchema {
 // SchemaByName return previously added schema by its name.
 // It returns nil for unknown schema.
 func (r *Repository) SchemaByName(name string) *FormSchema {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if s, ok := r.schemasByName[name]; ok {
 		return &s
 	}
