@@ -126,7 +126,7 @@
 
         if (this.success === null) {
             this.success = function (html) {
-                this.result.html("Submitted.");
+                self.result.html("Submitted.");
             }
         }
 
