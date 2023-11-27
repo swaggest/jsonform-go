@@ -41,6 +41,11 @@
          */
         this.beforeSubmit = null
 
+        /**
+         * @type {RawCallback}
+         */
+        this.requestFinished = null;
+
         this.schemaName = '';
         this.schema = undefined;
 
@@ -65,6 +70,7 @@
      * @property {RawCallback} onFail - Callback for failed response.
      * @property {HTMLCallback} onError - Callback for error.
      * @property {JSONCallback} onBeforeSubmit - Callback for sumbittable form data.
+     * @property {RawCallback} onRequestFinished - Callback after request finished.
      *
      * @property {Object} value - Value, can be absent if provided with valueUrl.
      * @property {Object} schema - Schema, can be absent if provided with schemaUrl.
@@ -115,6 +121,10 @@
 
         if (params.onBeforeSubmit) {
             this.beforeSubmit = params.onBeforeSubmit
+        }
+
+        if (params.onRequestFinished) {
+            this.requestFinished = params.onRequestFinished
         }
 
         var self = this
@@ -207,7 +217,7 @@
                 self.render()
             }, function (x) {
                 self.error("Failed to load schema using URL:<br /><code>" + schemaUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
-            })
+            }, null)
 
             return
         }
@@ -219,7 +229,7 @@
                 self.render()
             }, function (x) {
                 self.error("Failed to load value using URL:<br /><code>" + self.valueUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
-            })
+            }, null)
 
             return
         }
@@ -246,7 +256,7 @@
                 }
 
                 if (self.submitUrl && self.submitMethod) {
-                    send(self.submitUrl, self.submitMethod, values, self.successStatus, self.success, self.fail)
+                    send(self.submitUrl, self.submitMethod, values, self.successStatus, self.success, self.fail, self.requestFinished)
                 }
             }
         }
@@ -339,8 +349,9 @@
      * @param {Number} successStatus
      * @param {RawCallback} successCallback
      * @param {RawCallback} failCallback
+     * @param {RawCallback} finishCallback
      */
-    function send(url, method, bodyValues, successStatus, successCallback, failCallback) {
+    function send(url, method, bodyValues, successStatus, successCallback, failCallback, finishCallback) {
         var x = new XMLHttpRequest();
         x.onreadystatechange = function () {
             if (x.readyState !== XMLHttpRequest.DONE) {
@@ -348,6 +359,10 @@
             }
 
             console.log("request finished with status", x.status, "expected status", successStatus)
+
+            if (typeof (finishCallback) === 'function') {
+                finishCallback(x);
+            }
 
             if (!successStatus) {
                 if (typeof (successCallback) === 'function') {

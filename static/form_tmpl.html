@@ -55,6 +55,9 @@
     {{if $val.OnBeforeSubmit}}
     params.onBeforeSubmit = {{$val.OnBeforeSubmit}}
     {{end}}
+    {{if $val.OnRequestFinished}}
+    params.onRequestFinished = {{$val.OnRequestFinished}}
+    {{end}}
     form.make(params);
 })();
 {{end}}
