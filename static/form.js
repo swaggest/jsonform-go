@@ -36,6 +36,11 @@
          */
         this.success = null;
 
+        /**
+         * @type {JSONCallback}
+         */
+        this.beforeSubmit = null
+
         this.schemaName = '';
         this.schema = undefined;
 
@@ -59,6 +64,7 @@
      * @property {RawCallback} onSuccess - Callback for successful response.
      * @property {RawCallback} onFail - Callback for failed response.
      * @property {HTMLCallback} onError - Callback for error.
+     * @property {JSONCallback} onBeforeSubmit - Callback for sumbittable form data.
      *
      * @property {Object} value - Value, can be absent if provided with valueUrl.
      * @property {Object} schema - Schema, can be absent if provided with schemaUrl.
@@ -105,6 +111,10 @@
 
         if (params.onError) {
             this.error = params.onError
+        }
+
+        if (params.onBeforeSubmit) {
+            this.beforeSubmit = params.onBeforeSubmit
         }
 
         var self = this
@@ -229,6 +239,10 @@
                 if (errors) {
                     console.log(errors)
                     return;
+                }
+
+                if (self.beforeSubmit) {
+                    self.beforeSubmit(values)
                 }
 
                 if (self.submitUrl && self.submitMethod) {

@@ -21,6 +21,8 @@ type Form struct {
 	OnFail template.JS `json:"-"`
 	// OnError is a javascript callback that receives string HTML value in case of an error while processing the form.
 	OnError template.JS `json:"-"`
+	// OnBeforeSubmit is a javascript callback that receives form data after Submit button is clicked and before request is sent.
+	OnBeforeSubmit template.JS `json:"-"`
 
 	Schema *FormSchema `json:"schema,omitempty"`
 	Value  interface{} `json:"value,omitempty"`
