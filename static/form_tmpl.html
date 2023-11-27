@@ -52,7 +52,7 @@
     {{if $val.OnError}}
     params.onError = {{$val.OnError}}
     {{end}}
-    {{if $val.OnError}}
+    {{if $val.OnBeforeSubmit}}
     params.onBeforeSubmit = {{$val.OnBeforeSubmit}}
     {{end}}
     form.make(params);
