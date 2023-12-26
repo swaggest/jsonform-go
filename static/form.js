@@ -19,6 +19,12 @@
         /**
          * @type {Element}
          */
+        this.description = null;
+
+
+        /**
+         * @type {Element}
+         */
         this.result = null;
 
         /**
@@ -61,6 +67,7 @@
      * @typedef formParams
      * @type {Object}
      * @property {String} title - Title of the form.
+     * @property {String} description - Description of the form.
      * @property {String} schemaName - Schema name.
      * @property {String} valueUrl - URL to fetch value.
      * @property {String} submitUrl - URL to submit form.
@@ -69,7 +76,7 @@
      * @property {RawCallback} onSuccess - Callback for successful response.
      * @property {RawCallback} onFail - Callback for failed response.
      * @property {HTMLCallback} onError - Callback for error.
-     * @property {JSONCallback} onBeforeSubmit - Callback for sumbittable form data.
+     * @property {JSONCallback} onBeforeSubmit - Callback for submittable form data.
      * @property {RawCallback} onRequestFinished - Callback after request finished.
      *
      * @property {Object} value - Value, can be absent if provided with valueUrl.
@@ -105,6 +112,11 @@
                 document.title = params.title
             }
         }
+
+        if (params.description && this.description !== null) {
+            $(this.description).html(params.description)
+        }
+
         console.log("QUERY PARAMS:", params)
 
         if (params.onSuccess) {
@@ -140,12 +152,12 @@
                 self.error("Failed to submit form using URL:<br /><code>" + self.submitUrl + "</code><br />" +
                     "Expected status:<br /><code>" + self.successStatus + "</code><br />" +
                     "Status:<br /><code>" + x.status + "</code><br />" +
-                    "Response:<br /><code>" + x.responseText + "</code>")
+                    "Response:<br /><code>" + x.responseText + "</code>", self)
             }
         }
 
         if (this.success === null) {
-            this.success = function (html) {
+            this.success = function () {
                 self.result.html("Submitted.");
             }
         }
@@ -154,14 +166,14 @@
             this.schema = params.schema;
         } else {
             if (params.schemaName == null) {
-                this.error("Missing schemaName parameter in URL");
+                this.error("Missing schemaName parameter in URL", self);
                 return;
             }
         }
 
 
         if (params.submitUrl == null) {
-            this.error("Missing submitUrl parameter in URL");
+            this.error("Missing submitUrl parameter in URL", self);
             return;
         }
 
@@ -195,7 +207,7 @@
 
     JSONForm.prototype.render = function () {
         if (this.form === null) {
-            this.error("Missing destination form element, did you call setFormElement?")
+            this.error("Missing destination form element, did you call setFormElement?", this)
             return
         }
 
@@ -216,7 +228,7 @@
 
                 self.render()
             }, function (x) {
-                self.error("Failed to load schema using URL:<br /><code>" + schemaUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
+                self.error("Failed to load schema using URL:<br /><code>" + schemaUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>", self)
             }, null)
 
             return
@@ -228,7 +240,7 @@
 
                 self.render()
             }, function (x) {
-                self.error("Failed to load value using URL:<br /><code>" + self.valueUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>")
+                self.error("Failed to load value using URL:<br /><code>" + self.valueUrl + "</code><br />Response:<br /><code>" + x.responseText + "</code>", self)
             }, null)
 
             return
@@ -252,11 +264,11 @@
                 }
 
                 if (self.beforeSubmit) {
-                    self.beforeSubmit(values)
+                    self.beforeSubmit(values, self)
                 }
 
                 if (self.submitUrl && self.submitMethod) {
-                    send(self.submitUrl, self.submitMethod, values, self.successStatus, self.success, self.fail, self.requestFinished)
+                    send(self, self.submitUrl, self.submitMethod, values, self.successStatus, self.success, self.fail, self.requestFinished)
                 }
             }
         }
@@ -273,6 +285,13 @@
      */
     JSONForm.prototype.setTitleElement = function (title) {
         this.title = title;
+    }
+
+    /**
+     * @param {Element} description - Form description HTML element.
+     */
+    JSONForm.prototype.setDescriptionElement = function (description) {
+        this.description = description;
     }
 
 
@@ -329,20 +348,24 @@
     /**
      * @callback RawCallback
      * @param {XMLHttpRequest} value
+     * @param ctx - parent context.
      */
 
     /**
      * @callback HTMLCallback
      * @param {String} value
+     * @param ctx - parent context.
      */
 
     /**
      * @callback JSONCallback
      * @param {Object} value
+     * @param ctx - parent context.
      */
 
     /**
      *
+     * @param ctx - passed as last argument to callbacks.
      * @param {String} url
      * @param {String} method
      * @param {Object} bodyValues
@@ -351,7 +374,7 @@
      * @param {RawCallback} failCallback
      * @param {RawCallback} finishCallback
      */
-    function send(url, method, bodyValues, successStatus, successCallback, failCallback, finishCallback) {
+    function send(ctx, url, method, bodyValues, successStatus, successCallback, failCallback, finishCallback) {
         var x = new XMLHttpRequest();
         x.onreadystatechange = function () {
             if (x.readyState !== XMLHttpRequest.DONE) {
@@ -361,12 +384,12 @@
             console.log("request finished with status", x.status, "expected status", successStatus)
 
             if (typeof (finishCallback) === 'function') {
-                finishCallback(x);
+                finishCallback(x, ctx);
             }
 
             if (!successStatus) {
                 if (typeof (successCallback) === 'function') {
-                    successCallback(x);
+                    successCallback(x, ctx);
                 }
 
                 return
@@ -376,12 +399,12 @@
             switch (x.status) {
                 case successStatus:
                     if (typeof (successCallback) === 'function') {
-                        successCallback(x);
+                        successCallback(x, ctx);
                     }
                     break;
                 default:
                     if (typeof (failCallback) === 'function') {
-                        failCallback(x)
+                        failCallback(x, ctx)
                     } else {
                         throw {err: 'unexpected response', data: x};
                     }

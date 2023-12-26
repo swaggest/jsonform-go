@@ -9,6 +9,7 @@ import (
 // Form describes form parameters.
 type Form struct {
 	Title         string `json:"title,omitempty"`
+	Description   string `json:"description,omitempty"`
 	SchemaName    string `json:"schemaName,omitempty"`
 	ValueURL      string `json:"valueUrl,omitempty"`
 	SubmitURL     string `json:"submitUrl,omitempty"`
@@ -28,6 +29,9 @@ type Form struct {
 
 	Schema *FormSchema `json:"schema,omitempty"`
 	Value  interface{} `json:"value,omitempty"`
+
+	// SubmitText is an optional description of submit button.
+	SubmitText string `json:"-"`
 }
 
 // Page allows page customizations.
@@ -66,12 +70,21 @@ func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 		}
 
 		if form.Schema == nil && form.Value != nil {
-			var err error
-
-			form.Schema, err = r.formSchema(form.Value)
+			s, err := r.formSchema(form.Value)
 			if err != nil {
 				return err
 			}
+
+			form.Schema = &FormSchema{}
+			*form.Schema = *s
+
+			submit := FormItem{FormType: "submit", FormTitle: "Submit"}
+
+			if form.SubmitText != "" {
+				submit.FormTitle = form.SubmitText
+			}
+
+			form.Schema.Form = append(form.Schema.Form, submit)
 		}
 
 		d.Params = append(d.Params, form)

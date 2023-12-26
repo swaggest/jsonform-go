@@ -18,6 +18,7 @@
 {{range $i, $val := .Params}}
 <div class="pure-u-2-5" style="margin-right:2em">
     <h1 id="form-title-{{$i}}"></h1>
+    <div id="form-description-{{$i}}" class="form-description"></div>
     <form id="schema-form-{{$i}}" class="pure-form"></form>
     <div id="form-result-{{$i}}" class="alert"></div>
 </div>
@@ -42,6 +43,7 @@
     var form = new JSONForm();
     form.setFormElement($('#schema-form-{{$i}}'));
     form.setTitleElement($('#form-title-{{$i}}'));
+    form.setDescriptionElement($('#form-description-{{$i}}'));
     form.setResultElement($('#form-result-{{$i}}'))
     {{if $val.OnSuccess}}
     params.onSuccess = {{$val.OnSuccess}}

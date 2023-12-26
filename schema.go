@@ -158,7 +158,6 @@ func (r *Repository) reflect(value interface{}, name string) (fs FormSchema, err
 	schema.Required = nil
 
 	fs.Schema = schema
-	fs.Form = append(fs.Form, FormItem{FormType: "submit", FormTitle: "Submit"})
 
 	return fs, nil
 }
