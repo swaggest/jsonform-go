@@ -424,3 +424,11 @@
 
     window.JSONForm = JSONForm;
 })();
+
+function startSpinner(x, ctx) {
+    ctx.result.addClass("spinner")
+}
+
+function stopSpinner(x, ctx) {
+    ctx.result.removeClass("spinner")
+}

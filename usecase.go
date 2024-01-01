@@ -80,6 +80,11 @@ func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 
 			submit := FormItem{FormType: "submit", FormTitle: "Submit"}
 
+			if form.OnBeforeSubmit == "" && form.OnRequestFinished == "" {
+				form.OnBeforeSubmit = "startSpinner"
+				form.OnRequestFinished = "stopSpinner"
+			}
+
 			if form.SubmitText != "" {
 				submit.FormTitle = form.SubmitText
 			}

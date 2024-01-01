@@ -67,8 +67,7 @@ func TestRepository_AddSchema(t *testing.T) {
 			  ]
 			}
 		  ]
-		},
-		{"type":"submit","title":"Submit"}
+		}
 	  ],
 	  "schema":{
 		"properties":{
@@ -157,7 +156,7 @@ func TestRepository_Add_arrays(t *testing.T) {
 			}
 		  ]
 		},
-		{"key":"strings"},{"type":"submit","title":"Submit"}
+		{"key":"strings"}
 	  ],
 	  "schema":{
 		"properties":{
