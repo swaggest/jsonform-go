@@ -7,6 +7,11 @@
     <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="pure.css">
+    <script type="text/javascript" src="jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="underscore.js"></script>
+    <script type="text/javascript" src="jsv.js"></script>
+    <script type="text/javascript" src="jsonform.js"></script>
+    <script type="text/javascript" src="form.js"></script>
     {{.AppendHTMLHead}}
 </head>
 <body>
@@ -28,11 +33,6 @@
 
 {{.AppendHTML}}
 
-<script type="text/javascript" src="jquery-3.7.1.min.js"></script>
-<script type="text/javascript" src="underscore.js"></script>
-<script type="text/javascript" src="jsv.js"></script>
-<script type="text/javascript" src="jsonform.js"></script>
-<script type="text/javascript" src="form.js"></script>
 <script type="text/javascript">
 {{range $i, $val := .Params}}
 (function(){
