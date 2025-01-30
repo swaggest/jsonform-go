@@ -143,7 +143,7 @@
 
         if (this.error === null) {
             this.error = function (html) {
-                this.result.html('ERROR: ' + html);
+                this.result.html('ERROR: ' + html).show();
             }
         }
 
@@ -158,7 +158,7 @@
 
         if (this.success === null) {
             this.success = function () {
-                self.result.html("Submitted.");
+                self.result.html("Submitted.").show();
             }
         }
 
@@ -253,7 +253,7 @@
             schema: this.schema.schema,
             form: this.schema.form,
             onSubmit: function (errors, values) {
-                self.result.html('')
+                self.result.html('').hide()
 
                 console.log("VALUES", values);
                 console.log("ERRORS", errors);

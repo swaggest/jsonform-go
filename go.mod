@@ -3,12 +3,12 @@ module github.com/swaggest/jsonform-go
 go 1.18
 
 require (
-	github.com/bool64/dev v0.2.37
+	github.com/bool64/dev v0.2.38
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggest/assertjson v1.9.0
-	github.com/swaggest/jsonschema-go v0.3.72
+	github.com/swaggest/jsonschema-go v0.3.73
 	github.com/swaggest/refl v1.3.0
-	github.com/swaggest/rest v0.2.70
+	github.com/swaggest/rest v0.2.71
 	github.com/swaggest/usecase v1.3.1
 	github.com/vearutop/statigz v1.4.0
 )
@@ -16,7 +16,7 @@ require (
 require (
 	github.com/bool64/shared v0.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-chi/chi/v5 v5.1.0 // indirect
+	github.com/go-chi/chi/v5 v5.2.0 // indirect
 	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v3 v3.1.0 // indirect

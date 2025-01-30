@@ -3,29 +3,28 @@
 <head>
     <meta charset="utf-8"/>
     <title>{{.Title}}</title>
-    <base href="{{.BaseURL}}">
-    <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="{{.BaseURL}}bootstrap.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="pure.css">
-    <script type="text/javascript" src="jquery-3.7.1.min.js"></script>
-    <script type="text/javascript" src="underscore.js"></script>
-    <script type="text/javascript" src="jsv.js"></script>
-    <script type="text/javascript" src="jsonform.js"></script>
-    <script type="text/javascript" src="form.js"></script>
+    <link rel="stylesheet" href="{{.BaseURL}}pure.css">
+    <script type="text/javascript" src="{{.BaseURL}}jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="{{.BaseURL}}underscore.js"></script>
+    <script type="text/javascript" src="{{.BaseURL}}jsv.js"></script>
+    <script type="text/javascript" src="{{.BaseURL}}jsonform.js"></script>
+    <script type="text/javascript" src="{{.BaseURL}}form.js"></script>
     {{.AppendHTMLHead}}
 </head>
 <body>
 
 {{.PrependHTML}}
 
-<div style="margin:2em">
+<div style="margin-top:2em">
 
 {{range $i, $val := .Params}}
-<div class="pure-u-2-5" style="margin-right:2em">
+<div class="pure-u-2-5" style="margin-right:2em;margin-left: 2em">
     <h1 id="form-title-{{$i}}"></h1>
     <div id="form-description-{{$i}}" class="form-description"></div>
     <form id="schema-form-{{$i}}" class="pure-form"></form>
-    <div id="form-result-{{$i}}" class="alert"></div>
+    <div style="display: none" id="form-result-{{$i}}" class="alert"></div>
 </div>
 {{end}}
 
