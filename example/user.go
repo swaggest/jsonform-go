@@ -24,6 +24,7 @@ type User struct {
 	Age       int        `json:"age" title:"Age" minimum:"1"`
 	Status    userStatus `json:"status" title:"Status"`
 	Bio       string     `json:"bio" title:"Bio" description:"A brief description of the person." formType:"textarea"`
+	Code      string     `json:"code" formType:"ace" title:"Code" aceMode:"ace/mode/sql" minLength:"6"`
 }
 
 func (User) Title() string {

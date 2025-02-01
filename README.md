@@ -8,6 +8,7 @@
 ![Comments](https://sloc.xyz/github/swaggest/jsonform-go/?category=comments)
 
 This library renders HTML form from JSON Schema field tags of a Go structure.
+It is based on [`github.com/jsonform/jsonform`](https://github.com/jsonform/jsonform) JS library.
 
 ## Usage
 
@@ -80,7 +81,7 @@ repo.Render(output.Writer, jsonform.Page{}, jsonform.Form{
 
 ### Form Field Tags
 
-* `formType`, values `"textarea"`,`"password"`,`"wysihtml5"`,`"submit"`,`"color"`,`"checkboxes"`,`"radios"`,`"fieldset"`, `"help"`, `"hidden"`
+* `formType`, values `"textarea"`,`"password"`,`"wysihtml5"`,`"submit"`,`"color"`,`"checkboxes"`,`"radios"`,`"fieldset"`, `"help"`, `"hidden"`, `"ace"`
 * `formTitle` example `"Submit"`
 * `readOnly` example `"true"`
 * `prepend` example `"I feel"`

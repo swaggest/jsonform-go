@@ -14,7 +14,7 @@ import (
 // FormItem defines form item rendering parameters.
 type FormItem struct {
 	Key       string     `json:"key,omitempty" example:"longmood"`
-	FormType  string     `json:"type,omitempty" examples:"[\"textarea\",\"password\",\"wysihtml5\",\"submit\",\"color\",\"checkboxes\",\"radios\",\"fieldset\", \"help\", \"hidden\", \"array\"]"`
+	FormType  string     `json:"type,omitempty" examples:"[\"textarea\",\"password\",\"wysihtml5\",\"submit\",\"color\",\"checkboxes\",\"radios\",\"fieldset\", \"help\", \"hidden\", \"array\", \"ace\"]"`
 	FormTitle string     `json:"title,omitempty" example:"Submit"`
 	Items     []FormItem `json:"items,omitempty"`
 
@@ -31,6 +31,9 @@ type FormItem struct {
 	TitleMap       map[string]string `json:"titleMap,omitempty" description:"Title mapping for enum."`
 	ActiveClass    string            `json:"activeClass,omitempty" example:"btn-success" description:"Button mode for radio buttons."`
 	HelpValue      string            `json:"helpvalue,omitempty" example:"<strong>Click me!</strong>"`
+
+	AceMode  string `json:"aceMode,omitempty" example:"json"`
+	AceTheme string `json:"aceTheme,omitempty" example:"twilight"`
 }
 
 // FormSchema describes form elements.
