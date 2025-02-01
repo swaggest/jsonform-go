@@ -20,7 +20,18 @@ func createUserForm(r *jsonform.Repository) usecase.Interactor {
 	u := usecase.NewInteractor(func(ctx context.Context, input struct{}, output *usecase.OutputWithEmbeddedWriter) error {
 		return r.Render(output.Writer,
 			jsonform.Page{
-				Title:       "Create User and some more",
+				Title: "Create User and some more",
+				AppendHTMLHead: `
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.37.1/ace.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.37.1/ext-inline_autocomplete.min.js" integrity="sha512-99FE+tBv3oH1/pBRMytEllCvV2Web1lvyeunqcKnJHjiGMFLiwQ6WK6rknV/HYq/esz9i6JuprfgV4senYwtlA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.37.1/ext-language_tools.min.js" integrity="sha512-WPFoecnG6+TbAah6uWLOr+/36IDeXpa9klWh+SFWRzQeVC6x/n7rzODbzctFYL7rqxaDK2pbKj3psH7sws70Ng==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+window.jsonform_ace_setup = function(setup){
+console.log("jsonform_ace_setup", setup)
+setup()
+}
+</script>
+`,
 				PrependHTML: `<div><img src="http://placekitten.com/200/300" /></div>`,
 				AppendHTML:  `<div><img src="http://placekitten.com/300/200" /></div>`,
 			},
