@@ -13,8 +13,9 @@ import (
 
 func createUserForm(r *jsonform.Repository) usecase.Interactor {
 	type another struct {
-		Foo string `json:"foo" required:"true" title:"Foo" minLength:"3"`
-		Bar string `json:"bar" required:"true" title:"Bar" maxLength:"3"`
+		Foo  string `json:"foo" required:"true" title:"Foo" minLength:"3"`
+		Bar  string `json:"bar" required:"true" title:"Bar" maxLength:"3"`
+		Baz1 []int  `json:"baz1" required:"true" items.title:"Item Title" title:"Baz1" items.enum:"123,456,789" minimum:"1"`
 	}
 
 	u := usecase.NewInteractor(func(ctx context.Context, input struct{}, output *usecase.OutputWithEmbeddedWriter) error {
