@@ -12,17 +12,15 @@ linters-settings:
     threshold: 100
   misspell:
     locale: US
-  unused:
-    check-exported: false
   unparam:
     check-exported: true
-  cyclop:
-    max-complexity: 15
 
 linters:
   enable-all: true
   disable:
     - err113
+    - intrange
+    - copyloopvar
     - lll
     - gochecknoglobals
     - wrapcheck
@@ -52,7 +50,6 @@ issues:
         - noctx
         - funlen
         - dupl
-        - structcheck
         - unused
         - unparam
       path: "_test.go"
