@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strconv"
 )
 
 // Form describes form parameters.
 type Form struct {
+	// Name is used in form elements identifiers, form number is used for empty name.
+	Name          string `json:"name,omitempty"`
 	Title         string `json:"title,omitempty"`
 	Description   string `json:"description,omitempty"`
 	SchemaName    string `json:"schemaName,omitempty"`
@@ -32,6 +35,11 @@ type Form struct {
 
 	// SubmitText is an optional description of submit button.
 	SubmitText string `json:"-"`
+
+	// BeforeForm is injected before form container.
+	BeforeForm template.HTML `json:"-"`
+	// AfterForm is injected after form container.
+	AfterForm template.HTML `json:"-"`
 }
 
 // Page allows page customizations.
@@ -64,9 +72,13 @@ func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 		BaseURL: r.baseURL,
 	}
 
-	for _, form := range forms {
+	for i, form := range forms {
 		if d.Title == "" {
 			d.Title = form.Title
+		}
+
+		if form.Name == "" {
+			form.Name = strconv.Itoa(i)
 		}
 
 		if form.Schema == nil && form.Value != nil {

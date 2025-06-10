@@ -20,12 +20,14 @@
 <div style="margin-top:2em">
 
 {{range $i, $val := .Params}}
-<div class="pure-u-xl-2-5" style="padding:0 2em;">
-    <h1 id="form-title-{{$i}}"></h1>
-    <div id="form-description-{{$i}}" class="form-description"></div>
-    <form id="schema-form-{{$i}}" class="pure-form"></form>
-    <div style="display: none" id="form-result-{{$i}}" class="alert"></div>
+{{$val.BeforeForm}}
+<div class="pure-u-xl-2-5" style="padding:0 2em;" id="form-container-{{$val.Name}}">
+    <h1 id="form-title-{{$val.Name}}"></h1>
+    <div id="form-description-{{$val.Name}}" class="form-description"></div>
+    <form id="schema-form-{{$val.Name}}" class="pure-form"></form>
+    <div style="display: none" id="form-result-{{$val.Name}}" class="alert"></div>
 </div>
+{{$val.AfterForm}}
 {{end}}
 
 </div>
@@ -40,10 +42,10 @@
      */
     var params = {{$val}};
     var form = new JSONForm();
-    form.setFormElement($('#schema-form-{{$i}}'));
-    form.setTitleElement($('#form-title-{{$i}}'));
-    form.setDescriptionElement($('#form-description-{{$i}}'));
-    form.setResultElement($('#form-result-{{$i}}'))
+    form.setFormElement($('#schema-form-{{$val.Name}}'));
+    form.setTitleElement($('#form-title-{{$val.Name}}'));
+    form.setDescriptionElement($('#form-description-{{$val.Name}}'));
+    form.setResultElement($('#form-result-{{$val.Name}}'))
     {{if $val.OnSuccess}}
     params.onSuccess = {{$val.OnSuccess}}
     {{end}}

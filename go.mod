@@ -3,7 +3,7 @@ module github.com/swaggest/jsonform-go
 go 1.18
 
 require (
-	github.com/bool64/dev v0.2.39
+	github.com/bool64/dev v0.2.40
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggest/assertjson v1.9.0
 	github.com/swaggest/jsonschema-go v0.3.78
