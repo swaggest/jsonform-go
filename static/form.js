@@ -66,6 +66,7 @@
     /**
      * @typedef formParams
      * @type {Object}
+     * @property {String} name - Name of the form.
      * @property {String} title - Title of the form.
      * @property {String} description - Description of the form.
      * @property {String} schemaName - Schema name.
@@ -117,7 +118,7 @@
             $(this.description).html(params.description)
         }
 
-        console.log("QUERY PARAMS:", params)
+        // console.log("QUERY PARAMS:", params)
 
         if (params.onSuccess) {
             this.success = params.onSuccess
@@ -200,7 +201,7 @@
             this.setFormElement($('#schema-form'))
         }
 
-        console.log("FORM", this)
+        // console.log("FORM", this)
 
         this.render()
     }
@@ -247,7 +248,7 @@
         }
 
 
-        console.log("Rendering form")
+        // console.log("Rendering form")
 
         var formConf = {
             schema: this.schema.schema,
@@ -255,8 +256,8 @@
             onSubmit: function (errors, values) {
                 self.result.html('').hide()
 
-                console.log("VALUES", values);
-                console.log("ERRORS", errors);
+                // console.log("VALUES", values);
+                // console.log("ERRORS", errors);
 
                 if (errors) {
                     console.log(errors)
