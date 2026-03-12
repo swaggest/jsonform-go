@@ -70,7 +70,7 @@ func NewRepository(reflector *jsonschema.Reflector) *Repository {
 }
 
 // Name returns schema name by sample value.
-func (r *Repository) Name(value interface{}) string {
+func (r *Repository) Name(value any) string {
 	t := refl.DeepIndirect(reflect.TypeOf(value))
 
 	if name, ok := r.namesByType[t]; ok {
@@ -84,7 +84,7 @@ func (r *Repository) Name(value interface{}) string {
 
 // Add adds schemas of value samples.
 // It stops on the first error.
-func (r *Repository) Add(values ...interface{}) error {
+func (r *Repository) Add(values ...any) error {
 	for _, v := range values {
 		if err := r.AddNamed(v, r.Name(v)); err != nil {
 			return err
@@ -95,12 +95,12 @@ func (r *Repository) Add(values ...interface{}) error {
 }
 
 // AddNamed registers schema with custom name, this is not needed if default name is good enough.
-func (r *Repository) AddNamed(value interface{}, name string) error {
+func (r *Repository) AddNamed(value any, name string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	if _, ok := r.schemasByName[name]; ok {
-		return fmt.Errorf("schema for %s (%T) is already added", name, value)
+		return fmt.Errorf("%w: %s (%T)", errSchemaAlreadyAdded, name, value)
 	}
 
 	fs, err := r.reflect(value, name)
@@ -114,7 +114,7 @@ func (r *Repository) AddNamed(value interface{}, name string) error {
 	return nil
 }
 
-func (r *Repository) reflect(value interface{}, name string) (fs FormSchema, err error) {
+func (r *Repository) reflect(value any, name string) (fs FormSchema, err error) {
 	itemsSection := map[string]*FormItem{}
 
 	schema, err := r.reflector.Reflect(value, jsonschema.InlineRefs, jsonschema.InterceptProp(
@@ -179,7 +179,7 @@ func (r *Repository) reflect(value interface{}, name string) (fs FormSchema, err
 
 // Schema returns previously added schema by its sample value.
 // It returns nil for unknown schema.
-func (r *Repository) Schema(value interface{}) *FormSchema {
+func (r *Repository) Schema(value any) *FormSchema {
 	return r.SchemaByName(r.Name(value))
 }
 

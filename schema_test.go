@@ -12,8 +12,8 @@ import (
 
 type userStatus string
 
-func (us userStatus) Enum() []interface{} {
-	return []interface{}{
+func (us userStatus) Enum() []any {
+	return []any{
 		"new",
 		"approved",
 		"active",

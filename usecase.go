@@ -31,7 +31,7 @@ type Form struct {
 	OnRequestFinished template.JS `json:"-"`
 
 	Schema *FormSchema `json:"schema,omitempty"`
-	Value  interface{} `json:"value,omitempty"`
+	Value  any         `json:"value,omitempty"`
 
 	// SubmitText is an optional description of submit button.
 	SubmitText string `json:"-"`
@@ -63,6 +63,7 @@ var formTemplate = loadTemplate("form_tmpl.gohtml")
 func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 	type pageData struct {
 		Page
+
 		Params  []Form
 		BaseURL string
 	}
@@ -110,11 +111,11 @@ func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
 	return formTemplate.Execute(w, d)
 }
 
-func (r *Repository) formSchema(value interface{}) (*FormSchema, error) {
+func (r *Repository) formSchema(value any) (*FormSchema, error) {
 	formSchema := r.Schema(value)
 	if formSchema == nil {
 		if r.Strict {
-			return nil, fmt.Errorf("missing form schema for %T", value)
+			return nil, fmt.Errorf("%w: %T", errMissingFormSchema, value)
 		}
 
 		if err := r.Add(value); err != nil {
