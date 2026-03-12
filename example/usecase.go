@@ -33,8 +33,8 @@ setup()
 }
 </script>
 `,
-				PrependHTML: `<div><img src="http://placekitten.com/200/300" /></div>`,
-				AppendHTML:  `<div><img src="http://placekitten.com/300/200" /></div>`,
+				PrependHTML: `<div><h2>prepended</h2></div>`,
+				AppendHTML:  `<div><h2>appended</h2></div>`,
 			},
 			jsonform.Form{
 				Title:         "Create User",

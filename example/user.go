@@ -18,13 +18,16 @@ func (us userStatus) Enum() []interface{} {
 // A demo app that receives data from http and stores it in memory.
 
 type User struct {
-	FirstName string     `json:"firstName" required:"true" title:"First name" minLength:"3"`
-	LastName  string     `json:"lastName" required:"true" title:"Last name" minLength:"3"`
-	Locale    string     `json:"locale" title:"User locale" enum:"ru-RU,en-US"`
-	Age       int        `json:"age" title:"Age" minimum:"1"`
-	Status    userStatus `json:"status" title:"Status"`
-	Bio       string     `json:"bio" title:"Bio" description:"A brief description of the person." formType:"textarea"`
-	Code      string     `json:"code" formType:"ace" title:"Code" aceMode:"ace/mode/sql" minLength:"6"`
+	FirstName string         `json:"firstName" required:"true" title:"First name" minLength:"3"`
+	LastName  string         `json:"lastName" required:"true" title:"Last name" minLength:"3"`
+	Locale    string         `json:"locale" title:"User locale" enum:"ru-RU,en-US"`
+	Age       int            `json:"age,omitempty" title:"Age" minimum:"1" optionalToggle:"true"`
+	Status    userStatus     `json:"status" title:"Status"`
+	Bio       string         `json:"bio" title:"Bio" description:"A brief description of the person." formType:"textarea"`
+	HTML      string         `json:"_,omitempty" html:"Arbitrary HTML code <button onclick=\"alert('hello world!');return false\">Hi</button>"`
+	Code      string         `json:"code" formType:"ace" title:"Code" aceMode:"ace/mode/sql" minLength:"6"`
+	Counters  map[string]int `json:"counters,omitempty" title:"Counters"`
+	Roles     []string       `json:"roles,omitempty" title:"Roles"`
 }
 
 func (User) Title() string {

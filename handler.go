@@ -25,9 +25,9 @@ type schemaReq struct {
 
 type schemaName string
 
-func (s schemaName) Enum() []interface{} {
+func (s schemaName) Enum() []any {
 	ss := strings.Split(string(s), ",")
-	enum := make([]interface{}, 0, len(ss))
+	enum := make([]any, 0, len(ss))
 
 	for _, v := range ss {
 		enum = append(enum, v)
@@ -42,15 +42,15 @@ func (r *Repository) GetSchema() usecase.Interactor {
 		Name: schemaName(strings.Join(r.Names(), ",")),
 	}
 
-	u := usecase.NewIOI(in, new(FormSchema), func(ctx context.Context, in, out interface{}) error {
+	u := usecase.NewIOI(in, new(FormSchema), func(_ context.Context, in, out any) error {
 		input, ok := in.(schemaReq)
 		if !ok {
-			return fmt.Errorf("unexpected input: %T", in)
+			return fmt.Errorf("%w: %T", errUnexpectedInput, in)
 		}
 
 		output, ok := out.(*FormSchema)
 		if !ok {
-			return fmt.Errorf("unexpected output: %T", out)
+			return fmt.Errorf("%w: %T", errUnexpectedOutput, out)
 		}
 
 		if fs, found := r.schemasByName[string(input.Name)]; found {

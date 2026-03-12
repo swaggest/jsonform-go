@@ -217,7 +217,7 @@
         if (this.schema === undefined) {
             var schemaUrl = this.schemaName + "-schema.json"
 
-            send(schemaUrl, "GET", null, 200, function (resp) {
+            send(self, schemaUrl, "GET", null, 200, function (resp) {
                 console.log("SCHEMA RESP", resp)
 
                 self.schema = JSON.parse(resp.responseText);
@@ -236,7 +236,7 @@
         }
 
         if (this.value === undefined && this.valueUrl !== undefined && this.valueUrl !== '') {
-            send(this.valueUrl, "GET", null, 200, function (resp) {
+            send(self, this.valueUrl, "GET", null, 200, function (resp) {
                 self.value = JSON.parse(resp.responseText);
 
                 self.render()
