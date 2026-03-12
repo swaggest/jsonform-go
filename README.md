@@ -8,7 +8,7 @@
 ![Comments](https://sloc.xyz/github/swaggest/jsonform-go/?category=comments)
 
 This library renders HTML form from JSON Schema field tags of a Go structure.
-It is based on [`github.com/jsonform/jsonform`](https://github.com/jsonform/jsonform) JS library.
+It is based on [`github.com/swaggest/jsonform`](https://github.com/jsonform/jsonform) JS library.
 
 ## Usage
 
@@ -93,3 +93,5 @@ repo.Render(output.Writer, jsonform.Page{}, jsonform.Form{
 * `inlineTitle` example `"Check this box if you are over 18"`
 * `activeClass` example `"btn-success"`, button mode for radio buttons
 * `helpValue` example `"<strong>Click me!</strong>"`
+* `optionalToggle` example `"true"`, adds confirmation checkbox to optional fields
+* `optionalToggleLabel` example `"include"`, sets custom label to confirmation checkbox

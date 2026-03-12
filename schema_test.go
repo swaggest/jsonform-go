@@ -24,12 +24,15 @@ func (us userStatus) Enum() []interface{} {
 // A demo app that receives data from http and stores it in memory.
 
 type User struct {
-	FirstName string     `json:"firstName" required:"true" title:"First name" minLength:"3"`
-	LastName  string     `json:"lastName" required:"true" title:"Last name" minLength:"3"`
-	Locale    string     `json:"locale" title:"User locale" enum:"ru-RU,en-US"`
-	Age       int        `json:"age" title:"Age" minimum:"1"`
-	Status    userStatus `json:"status" title:"Status"`
-	Bio       string     `json:"bio" title:"Bio" description:"A brief description of the person." formType:"textarea"`
+	FirstName string         `json:"firstName" required:"true" title:"First name" minLength:"3"`
+	LastName  string         `json:"lastName" required:"true" title:"Last name" minLength:"3"`
+	Locale    string         `json:"locale" title:"User locale" enum:"ru-RU,en-US"`
+	Age       int            `json:"age" title:"Age" minimum:"1" optionalToggle:"true"`
+	Status    userStatus     `json:"status" title:"Status"`
+	Bio       string         `json:"bio" title:"Bio" description:"A brief description of the person." formType:"textarea"`
+	HTML      string         `json:"_,omitempty" html:"Arbitrary HTML code <button onclick=\"alert('hello world!');return false\">Hi</button>"`
+	Code      string         `json:"code" formType:"ace" title:"Code" aceMode:"ace/mode/sql" minLength:"6"`
+	Counters  map[string]int `json:"counters,omitempty" title:"Counters"`
 }
 
 type UserWithNeighbors struct {
@@ -52,8 +55,18 @@ func TestRepository_AddSchema(t *testing.T) {
 	assertjson.EqMarshal(t, `{
 	  "form":[
 		{"key":"user.firstName"},{"key":"user.lastName"},{"key":"user.locale"},
-		{"key":"user.age"},{"key":"user.status"},
+		{"key":"user.age","optionalToggle":true},{"key":"user.status"},
 		{"key":"user.bio","type":"textarea"},
+		{
+		  "type":"fieldhtml",
+		  "html":"Arbitrary HTML code <button onclick=\"alert('hello world!');return false\">Hi</button>"
+		},
+		{"key":"user.code","type":"ace","aceMode":"ace/mode/sql"},
+		{"key":"user.counters"},{"key":"user"},
+		{
+		  "type":"fieldhtml",
+		  "html":"Arbitrary HTML code <button onclick=\"alert('hello world!');return false\">Hi</button>"
+		},
 		{
 		  "key":"neighbors","type":"array",
 		  "items":[
@@ -61,9 +74,12 @@ func TestRepository_AddSchema(t *testing.T) {
 			  "type":"section",
 			  "items":[
 				{"key":"neighbors[].firstName"},{"key":"neighbors[].lastName"},
-				{"key":"neighbors[].locale"},{"key":"neighbors[].age"},
+				{"key":"neighbors[].locale"},
+				{"key":"neighbors[].age","optionalToggle":true},
 				{"key":"neighbors[].status"},
-				{"key":"neighbors[].bio","type":"textarea"}
+				{"key":"neighbors[].bio","type":"textarea"},
+				{"key":"neighbors[].code","type":"ace","aceMode":"ace/mode/sql"},
+				{"key":"neighbors[].counters"}
 			  ]
 			}
 		  ]
@@ -81,6 +97,11 @@ func TestRepository_AddSchema(t *testing.T) {
 				"bio":{
 				  "title":"Bio","description":"A brief description of the person.",
 				  "type":"string"
+				},
+				"code":{"title":"Code","minLength":6,"type":"string"},
+				"counters":{
+				  "title":"Counters","additionalProperties":{"type":"integer"},
+				  "type":"object"
 				},
 				"firstName":{"title":"First name","minLength":3,"type":"string"},
 				"lastName":{"title":"Last name","minLength":3,"type":"string"},
@@ -102,6 +123,11 @@ func TestRepository_AddSchema(t *testing.T) {
 			  "bio":{
 				"title":"Bio","description":"A brief description of the person.",
 				"type":"string"
+			  },
+			  "code":{"title":"Code","minLength":6,"type":"string"},
+			  "counters":{
+				"title":"Counters","additionalProperties":{"type":"integer"},
+				"type":"object"
 			  },
 			  "firstName":{"title":"First name","minLength":3,"type":"string"},
 			  "lastName":{"title":"Last name","minLength":3,"type":"string"},

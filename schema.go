@@ -20,17 +20,20 @@ type FormItem struct {
 
 	ReadOnly bool `json:"readonly,omitempty"`
 
-	Prepend        string            `json:"prepend,omitempty" example:"I feel"`
-	Append         string            `json:"append,omitempty" example:"today"`
-	NoTitle        bool              `json:"notitle,omitempty"`
-	HtmlClass      string            `json:"htmlClass,omitempty" example:"usermood"`
-	HtmlMetaData   map[string]string `json:"htmlMetaData,omitempty" example:"{\"style\":\"border: 1px solid blue\",\"data-title\":\"Mood\"}"`
-	FieldHtmlClass string            `json:"fieldHtmlClass,omitempty" example:"input-xxlarge"`
-	Placeholder    string            `json:"placeholder,omitempty" example:"incredibly and admirably great"`
-	InlineTitle    string            `json:"inlinetitle,omitempty" example:"Check this box if you are over 18"`
-	TitleMap       map[string]string `json:"titleMap,omitempty" description:"Title mapping for enum."`
-	ActiveClass    string            `json:"activeClass,omitempty" example:"btn-success" description:"Button mode for radio buttons."`
-	HelpValue      string            `json:"helpvalue,omitempty" example:"<strong>Click me!</strong>"`
+	Prepend             string            `json:"prepend,omitempty" example:"I feel"`
+	Append              string            `json:"append,omitempty" example:"today"`
+	NoTitle             bool              `json:"notitle,omitempty"`
+	HtmlClass           string            `json:"htmlClass,omitempty" example:"usermood"`
+	HtmlMetaData        map[string]string `json:"htmlMetaData,omitempty" example:"{\"style\":\"border: 1px solid blue\",\"data-title\":\"Mood\"}"`
+	FieldHtmlClass      string            `json:"fieldHtmlClass,omitempty" example:"input-xxlarge"`
+	Placeholder         string            `json:"placeholder,omitempty" example:"incredibly and admirably great"`
+	InlineTitle         string            `json:"inlinetitle,omitempty" example:"Check this box if you are over 18"`
+	TitleMap            map[string]string `json:"titleMap,omitempty" description:"Title mapping for enum."`
+	ActiveClass         string            `json:"activeClass,omitempty" example:"btn-success" description:"Button mode for radio buttons."`
+	HelpValue           string            `json:"helpvalue,omitempty" example:"<strong>Click me!</strong>"`
+	Html                string            `json:"html,omitempty"`
+	OptionalToggle      bool              `json:"optionalToggle,omitempty"`
+	OptionalToggleLabel string            `json:"optionalToggleLabel,omitempty"`
 
 	AceMode  string `json:"aceMode,omitempty" example:"json"`
 	AceTheme string `json:"aceTheme,omitempty" example:"twilight"`
@@ -116,7 +119,7 @@ func (r *Repository) reflect(value interface{}, name string) (fs FormSchema, err
 
 	schema, err := r.reflector.Reflect(value, jsonschema.InlineRefs, jsonschema.InterceptProp(
 		func(params jsonschema.InterceptPropParams) error {
-			if !params.Processed || params.PropertySchema.HasType(jsonschema.Object) {
+			if !params.Processed {
 				return nil
 			}
 
@@ -133,6 +136,19 @@ func (r *Repository) reflect(value interface{}, name string) (fs FormSchema, err
 				fi.Items = []FormItem{*s}
 			}
 
+			switch fi.FormType {
+			case "submit",
+				"help",
+				"button",
+				"fieldset":
+				fi.Key = ""
+			}
+
+			if fi.Html != "" {
+				fi.Key = ""
+				fi.FormType = "fieldhtml"
+			}
+
 			if p := strings.LastIndex(fi.Key, "[]"); p != -1 {
 				parent := fi.Key[0:p]
 
@@ -145,20 +161,16 @@ func (r *Repository) reflect(value interface{}, name string) (fs FormSchema, err
 				fs.Form = append(fs.Form, fi)
 			}
 
+			if fi.Key == "" {
+				return jsonschema.ErrSkipProperty
+			}
+
 			return nil
 		},
 	))
 	if err != nil {
 		return fs, fmt.Errorf("reflecting %s schema: %w", name, err)
 	}
-
-	for _, name := range schema.Required { // Complying with Draft 3.
-		if prop, ok := schema.Properties[name]; ok {
-			prop.TypeObject.WithExtraPropertiesItem("required", true)
-		}
-	}
-
-	schema.Required = nil
 
 	fs.Schema = schema
 

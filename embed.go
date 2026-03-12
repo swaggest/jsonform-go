@@ -22,7 +22,7 @@ func loadTemplate(fileName string) *template.Template {
 		panic(err)
 	}
 
-	tmpl, err := template.New("htmlResponse").Parse(string(tpl))
+	tmpl, err := template.New(fileName).Parse(string(tpl))
 	if err != nil {
 		panic(err)
 	}

@@ -57,7 +57,7 @@ type Page struct {
 	Title string
 }
 
-var formTemplate = loadTemplate("form_tmpl.html")
+var formTemplate = loadTemplate("form_tmpl.gohtml")
 
 // Render renders forms as web page.
 func (r *Repository) Render(w io.Writer, p Page, forms ...Form) error {
