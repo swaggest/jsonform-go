@@ -38,6 +38,19 @@ func (User) Description() string {
 	return "User is a sample entity."
 }
 
+type ImageSettings struct {
+	Description string   `json:"description,omitempty" formType:"textarea" title:"Description"`
+	HTTPSources []string `json:"http_sources,omitempty" title:"HTTP Sources"`
+	Rotate      int      `json:"rotate,omitempty" title:"Rotate"`
+}
+
+type Image struct {
+	Path     string        `json:"path" readOnly:"true" title:"Path"`
+	Width    int           `json:"width" readOnly:"true" title:"Width"`
+	Height   int           `json:"height" readOnly:"true" title:"Height"`
+	Settings ImageSettings `json:"settings" title:"Settings" description:"Nested image settings."`
+}
+
 type userRepo struct {
 	st         []User
 	schemaName string

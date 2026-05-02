@@ -119,7 +119,7 @@ func (r *Repository) reflect(value any, name string) (fs FormSchema, err error) 
 
 	schema, err := r.reflector.Reflect(value, jsonschema.InlineRefs, jsonschema.InterceptProp(
 		func(params jsonschema.InterceptPropParams) error {
-			if !params.Processed {
+			if !params.Processed || params.PropertySchema.HasType(jsonschema.Object) {
 				return nil
 			}
 

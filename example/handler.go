@@ -11,6 +11,10 @@ func (r *userRepo) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 <a href="/json-form/form.html?title=Create%20user&amp;schemaName=` + r.schemaName + `&amp;submitUrl=/users&amp;submitMethod=POST&amp;successStatus=201">Create user with dynamic form</a>
 <br />
 <a href="/create-user">Create user with static form</a>
+<br />
+<a href="/nested-image">Nested object reproducer</a>
+<br />
+<a href="/nested-image-schema.json">Nested object raw schema JSON</a>
 </div>
 
 <ul>

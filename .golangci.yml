@@ -5,6 +5,8 @@ run:
 linters:
   default: all
   disable:
+    - embeddedstructfieldcheck
+    - nilnil
     - noinlineerr
     - wsl_v5
     - funcorder
@@ -37,6 +39,8 @@ linters:
       check-blank: true
     gocyclo:
       min-complexity: 20
+    cyclop:
+      max-complexity: 15
     misspell:
       locale: US
     unparam:
@@ -58,6 +62,9 @@ linters:
           - errcheck
           - gosec
         path: example_
+      - linters:
+          - revive
+        text: 'unused-parameter: parameter'
       - linters:
           - revive
         text: 'var-naming: struct field'
