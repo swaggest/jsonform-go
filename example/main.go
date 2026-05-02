@@ -30,6 +30,7 @@ func main() {
 
 	jf := jsonform.NewRepository(s.OpenAPIReflector().JSONSchemaReflector())
 	_ = jf.Add(User{})
+	_ = jf.Add(Image{})
 	ur.schemaName = jf.Name(User{})
 
 	// Add use case handler to router.
@@ -41,6 +42,8 @@ func main() {
 	// Static forms.
 	s.Get("/create-user", createUserForm(jf))
 	s.Get("/edit-user/{id}", editUserForm(jf, ur))
+	s.Get("/nested-image", nestedImageForm(jf))
+	s.Get("/nested-image-schema.json", nestedImageSchema(jf))
 
 	// Swagger UI endpoint at /docs.
 	s.Docs("/docs", swgui.New)

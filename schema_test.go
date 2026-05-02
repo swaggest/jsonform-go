@@ -62,7 +62,6 @@ func TestRepository_AddSchema(t *testing.T) {
 		  "html":"Arbitrary HTML code <button onclick=\"alert('hello world!');return false\">Hi</button>"
 		},
 		{"key":"user.code","type":"ace","aceMode":"ace/mode/sql"},
-		{"key":"user.counters"},{"key":"user"},
 		{
 		  "type":"fieldhtml",
 		  "html":"Arbitrary HTML code <button onclick=\"alert('hello world!');return false\">Hi</button>"
@@ -78,8 +77,7 @@ func TestRepository_AddSchema(t *testing.T) {
 				{"key":"neighbors[].age","optionalToggle":true},
 				{"key":"neighbors[].status"},
 				{"key":"neighbors[].bio","type":"textarea"},
-				{"key":"neighbors[].code","type":"ace","aceMode":"ace/mode/sql"},
-				{"key":"neighbors[].counters"}
+				{"key":"neighbors[].code","type":"ace","aceMode":"ace/mode/sql"}
 			  ]
 			}
 		  ]
